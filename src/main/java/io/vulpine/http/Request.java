@@ -29,6 +29,7 @@ public class Request
   protected URL url;
   protected boolean sent           = false;
   private   boolean streamResponse = false;
+  protected boolean followRedirects = false;
 
   public Request()
   {
@@ -53,6 +54,18 @@ public class Request
   public Request setHeader( String key, String value )
   {
     headers.put(key, value);
+    return this;
+  }
+
+  public Request allowRedirects()
+  {
+    this.followRedirects = true;
+    return this;
+  }
+
+  public Request disallowRedirects()
+  {
+    followRedirects = false;
     return this;
   }
 
@@ -141,6 +154,7 @@ public class Request
   public Response submit() throws IOException
   {
     final HttpURLConnection con;
+    final int resp;
     final BufferedReader    read;
     final StringBuffer      body;
     String                  line;
@@ -151,6 +165,7 @@ public class Request
 
     con = (HttpURLConnection) url.openConnection();
     con.setRequestMethod(method.name());
+    con.setInstanceFollowRedirects(followRedirects);
 
     headers.forEach(con::setRequestProperty);
 
@@ -164,9 +179,20 @@ public class Request
       writer.close();
     }
 
+    resp = con.getResponseCode();
+
+    if (followRedirects && resp >= 300 && resp < 400) {
+      sent   = false;
+      url    = new URL(con.getHeaderField("Location"));
+      method = Method.GET;
+      requestBody = "";
+      return submit();
+    }
+
     if (streamResponse) {
       return new Response(Response.Code.byCode(con.getResponseCode()), con.getHeaderFields(), con.getInputStream(), this);
     }
+
     try {
       read = new BufferedReader(new InputStreamReader(con.getInputStream()));
     } catch (final IOException e) {
