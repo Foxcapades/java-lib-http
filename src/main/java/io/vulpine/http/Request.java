@@ -165,7 +165,7 @@ public class Request
 
     con = (HttpURLConnection) url.openConnection();
     con.setRequestMethod(method.name());
-    con.setInstanceFollowRedirects(followRedirects);
+    //con.setInstanceFollowRedirects(followRedirects);
 
     headers.forEach(con::setRequestProperty);
 
