@@ -31,7 +31,7 @@ bintray {
     name = config.name
     userOrg = 'vpx'
     licenses = ['Apache-2.0']
-    vcsUrl = "https://bitbucket.org/${config.groupKey}/${config.name}"
+    vcsUrl = "https://github.com/${config.groupKey}/${config.repo}"
     version {
       name = config.version
       released = new Date()
