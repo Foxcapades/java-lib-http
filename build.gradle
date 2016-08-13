@@ -62,7 +62,7 @@ publishing {
       pom.withXml {
         { Node project ->
 
-          def gitHubUrl = "https://github.com/${config.groupKey}/${config.repo}"
+          def gitHubUrl = "https://github.com/${config.groupKey}/${config.repo}";
 
           new Wrap(project)
             .app('inceptionYear', '2016').up()
@@ -75,7 +75,7 @@ publishing {
           ]).up()
             .mApp('ciManagement', [
             system: 'Travis CI',
-            url: "https://travis-ci.org/${config.groupKey}/${conf.repo}"
+            url: "https://travis-ci.org/${config.groupKey}/${config.repo}"
           ]).up()
             .mApp('scm', [
             connection: "scm:git:${gitHubUrl}.git",
