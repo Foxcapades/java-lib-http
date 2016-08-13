@@ -1,14 +1,98 @@
-group 'io.vulpine'
-version '1.0.0'
+plugins { id "com.jfrog.bintray" version "1.7.1" }
+
+def config = [
+  group:   'io.vulpine.lib',
+  groupKey: 'vulpine',
+  version: '0.1.1',
+  name:    'http',
+  repo:    'lib-http',
+  jvm:     '1.8'
+];
+
+group config.group
+version config.version
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.8
+sourceCompatibility = config.jvm
+targetCompatibility = config.jvm
 
-repositories {
-    mavenCentral()
+/*
+ * BinTray Configuration
+ */
+bintray {
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_KEY')
+  publications = ['maven']
+  pkg {
+    repo = 'maven'
+    name = config.name
+    userOrg = 'vpx'
+    licenses = ['Apache-2.0']
+    vcsUrl = "https://bitbucket.org/${config.groupKey}/${config.name}"
+    version {
+      name = config.version
+      released = new Date()
+      vcsTag = config.version
+    }
+  }
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.14.1'
+  distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+repositories {}
+dependencies {}
+
+class Wrap{Node u;Wrap p;Wrap(n){u=n};Wrap(a,b){u=a;p=b};Wrap mApp(s,Map v){def c=u.appendNode(s);v.forEach({k,d->c.
+  appendNode(k,d)});return new Wrap(c,this)};Wrap nApp(s,...l){def n=u.appendNode(s);for(def c:l)n.append(c);return new
+  Wrap(n,this)};Wrap app(a, b){def n=u.appendNode(a,b);return new Wrap(n,this)};Wrap up(){return p}}
+
+publishing {
+
+  repositories { maven { url "https://api.bintray.com/maven/vpx/maven/${config.name}/;publish=1" } }
+
+  publications {
+    maven(MavenPublication) {
+      from components.java
+      pom.withXml {
+        { Node project ->
+
+          def gitHubUrl = "https://github.com/${config.groupKey}/${config.repo}"
+
+          new Wrap(project)
+            .app('inceptionYear', '2016').up()
+            .mApp('organization', [name: 'Vulpine IO', url: 'http://vulpine.io']).up()
+            .nApp('developers')
+            .mApp('developer', [id: 'elliefops', name: 'Elizabeth Harper', email: 'elliefops@gmail.com']).up().up()
+            .mApp('issueManagement', [
+            system: 'YouTrack',
+            url: "http://${config.groupKey}.myjetbrains.com/youtrack/issues?q=project%3A+${config.repo}"
+          ]).up()
+            .mApp('ciManagement', [
+            system: 'Travis CI',
+            url: "https://travis-ci.org/${config.groupKey}/${conf.repo}"
+          ]).up()
+            .mApp('scm', [
+            connection: "scm:git:${gitHubUrl}.git",
+            developerConnection: "scm:git:${gitHubUrl}.git",
+            tag: 'master',
+            url: gitHubUrl
+          ]).up()
+            .nApp('licenses')
+            .mApp('license', [
+            name: 'Apache License, Version 2.0',
+            url: 'http://www.apache.org/licenses/LICENSE-2.0.txt',
+            distribution: 'repo'
+          ]);
+
+          return project;
+        }.call((Node)asNode())
+      }
+    }
+  }
 }
