@@ -61,7 +61,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
 
-group config.organization.slug + config.project.group
+group "${config.organization.slug}.${config.project.group}"
 version config.project.version
 
 sourceCompatibility = config.project.jvm
