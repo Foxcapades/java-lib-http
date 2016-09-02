@@ -3,10 +3,10 @@ plugins { id "com.jfrog.bintray" version "1.7.1" }
 def config = [
   group:   'io.vulpine.lib',
   groupKey: 'vulpine',
-  version: '0.1.1',
+  version: '0.2.0',
   name:    'http',
   repo:    'lib-http',
-  jvm:     '1.8'
+  jvm:     '1.6'
 ];
 
 group config.group
@@ -41,12 +41,12 @@ bintray {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.14.1'
+  gradleVersion = '3.0'
   distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
-repositories {}
-dependencies {}
+repositories {  maven { url 'http://dl.bintray.com/vpx/maven' } }
+dependencies { compile 'io.vulpine.lib:logging:0.1.0' }
 
 class Wrap{Node u;Wrap p;Wrap(n){u=n};Wrap(a,b){u=a;p=b};Wrap mApp(s,Map v){def c=u.appendNode(s);v.forEach({k,d->c.
   appendNode(k,d)});return new Wrap(c,this)};Wrap nApp(s,...l){def n=u.appendNode(s);for(def c:l)n.append(c);return new
