@@ -30,7 +30,7 @@ def config = [
   project: [
     group: 'lib',
     name: 'http',
-    version: '0.2.0',
+    version: '0.2.1',
     groupKey: 'Vulpine-IO',
     repo: 'http',
     site: 'https://github.com/Vulpine-IO/lib-http',
@@ -111,14 +111,48 @@ repositories {
 }
 
 dependencies {
-  compile group: 'io.vulpine.lib', name: 'logging', version: '0.1.0'
+  compile group: 'io.vulpine.lib', name: 'logging', version: '0.1.1'
+}
+
+/*
+ * Tasks
+ */
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '3.0'
+  distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+task sourceJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadoc(overwrite: true, type: Javadoc) {
+  source = sourceSets.main.allJava
+  destinationDir = file("${project.projectDir}/docs/")
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourceJar
+  archives javadocJar
 }
 
 publishing {
   repositories { maven { url "https://api.bintray.com/maven/vpx/maven/${config.project.name}/;publish=1" } }
   publications {
     maven(MavenPublication) {
+
       from components.java;
+
+      artifact sourceJar
+      artifact javadocJar
+
       pom.withXml {
         { Node project ->
 
@@ -162,9 +196,4 @@ publishing {
       }
     }
   }
-}
-
-task wrapper(type: Wrapper) {
-  gradleVersion = '3.0'
-  distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
