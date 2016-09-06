@@ -4,7 +4,6 @@ jdk:
 - oraclejdk8
 
 before_install: chmod +x gradlew
+install: true
 
-script: ./gradlew build
-
-after_success: ./gradlew bintrayUpload
+script: ./gradlew classes

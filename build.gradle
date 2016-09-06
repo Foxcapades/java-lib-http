@@ -1,118 +1,14 @@
-plugins { id "com.jfrog.bintray" version "1.7.1" }
-
-class Wrap {
-  Node wrapped;
-  Wrap parent;
-  Wrap( Node node ) { wrapped = node; }
-  Wrap( Node node, Wrap parent ) { this.wrapped = node; this.parent = parent; }
-  Wrap contain( node, Map children ) {
-    Node c = wrapped.appendNode(node);
-    children.forEach({ tag, content -> c.appendNode(tag, content) });
-    return new Wrap(c, this)
-  };
-  Wrap nested( newNode, ... childNodes ) {
-    Node appended = wrapped.appendNode(newNode);
-    for (def child : childNodes) appended.append(child);
-    return new Wrap(appended, this)
-  };
-  Wrap append( name, value ) { def n = wrapped.appendNode(name, value); return new Wrap(n, this) };
-}
-
-def config = [
-
-  organization: [
-    title: "Vulpine IO",
-    site: "https://github.com/Vulpine-IO",
-    slug: "io.vulpine",
-    key: "Vulpine-IO"
-  ],
-
-  project: [
-    group: 'lib',
-    name: 'http',
-    version: '0.2.1',
-    groupKey: 'Vulpine-IO',
-    repo: 'http',
-    site: 'https://github.com/Vulpine-IO/lib-http',
-    vcs: 'https://github.com/Vulpine-IO/lib-http.git',
-    tracker: 'https://github.com/Vulpine-IO/lib-http/issues',
-    jvm: '1.6'
-  ],
-
-  developers: [
-    [
-      name: "Elizabeth Harper",
-      email: "elliefops@gmail.com",
-      user: "elliefops",
-      site: "https://github.com/EllieFops"
-    ]
-  ],
-
-  licenses: [
-    [
-      name: 'Apache License, Version 2.0',
-      url: 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    ]
-  ]
-];
-
 apply plugin: 'java'
 apply plugin: 'maven'
-apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
+apply plugin: 'signing'
+apply from: 'config.gradle'
 
 group "${config.organization.slug}.${config.project.group}"
 version config.project.version
 
 sourceCompatibility = config.project.jvm
 targetCompatibility = config.project.jvm
-
-/*
- * JaCoCo Configuration
- */
-jacoco {
-  toolVersion = "0.7.6.201602180812"
-  reportsDir = file("${buildDir}/reports/jacoco")
-}
-
-jacocoTestReport {
-  reports {
-    xml.enabled true
-    html.enabled false
-  }
-}
-
-/*
- * BinTray Configuration
- */
-bintray {
-  user = System.getenv('BINTRAY_USER')
-  key  = System.getenv('BINTRAY_KEY')
-  publications = [ 'maven' ]
-  pkg {
-    repo = 'maven'
-    name = config.project.name
-    userOrg = 'vpx'
-    licenses = [ 'Apache-2.0' ]
-    vcsUrl = config.project.site
-    version {
-      name = config.project.version
-      released = new Date()
-      vcsTag = config.project.version
-    }
-  }
-}
-
-repositories {
-  mavenCentral()
-  maven {
-    url 'http://dl.bintray.com/vpx/maven'
-  }
-}
-
-dependencies {
-  compile group: 'io.vulpine.lib', name: 'logging', version: '0.1.1'
-}
 
 /*
  * Tasks
@@ -138,61 +34,114 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
   from javadoc.destinationDir
 }
 
+/*
+ * JaCoCo Configuration
+ */
+jacoco {
+  toolVersion = "0.7.6.201602180812"
+  reportsDir = file("${buildDir}/reports/jacoco")
+}
+
+jacocoTestReport {
+  reports {
+    xml.enabled true
+    html.enabled false
+  }
+}
+
+configurations {
+  asciidoctor
+}
+
 artifacts {
+  archives jar
   archives sourceJar
   archives javadocJar
 }
 
-publishing {
-  repositories { maven { url "https://api.bintray.com/maven/vpx/maven/${config.project.name}/;publish=1" } }
-  publications {
-    maven(MavenPublication) {
+signing {
+  sign configurations.archives
+}
 
-      from components.java;
+repositories {
+  mavenCentral()
+}
 
-      artifact sourceJar
-      artifact javadocJar
+dependencies {
+  compile group: 'io.vulpine.lib', name: 'logging', version: '0.1.2'
+  asciidoctor(
+    [ group: 'org.asciidoctor', name: 'asciidoclet', version: '0.1.3' ]
+  )
+}
 
-      pom.withXml {
-        { Node project ->
+javadoc {
+  source = sourceSets.main.allJava
+  options {
+    tags = [ "chainable" ]
+    doclet = 'org.asciidoctor.Asciidoclet'
+    docletpath = configurations.asciidoctor.files.asType(List)
+  }
+}
 
-          final Wrap wrap, devs, lics;
+uploadArchives {
 
-          wrap = new Wrap(project)
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-          wrap.append 'inceptionYear', '2016'
+      repository( url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/' ) {
+        authentication( userName: OSSRH_USERNAME, password: OSSRH_PASSWORD )
+      }
 
-          wrap.contain 'organization', [ name: config.organization.title, url: config.organization.site ]
+//      repository( url: 'https://oss.sonatype.org/content/repositories/snapshots/' ) {
+//        authentication( userName: config.credentials.username, password: config.credentials.password )
+//      }
 
-          devs = wrap.nested 'developers'
+      pom.project {
+        name "${config.organization.slug}.${config.project.group}:${config.project.name}"
+        packaging 'jar'
+        description config.project.description
+        url config.project.site
 
-          config.developers.forEach {
-            dev -> devs.contain 'developer', [ id: dev.user, name: dev.name, email: dev.email ]
+        inceptionYear '2016'
+
+        organization {
+          name config.organization.title
+          url config.organization.site
+        }
+
+        issueManagement {
+          system 'Issue Tracker'
+          url config.project.tracker
+        }
+
+        ciManagement {
+          system 'Travis CI'
+          url "https://travis-ci.org/${config.organization.key}"
+        }
+
+        scm {
+          connection "scm:git:${config.project.vcs}"
+          developerConnection "scm:git:${config.project.vcs}"
+          tag 'master'
+          url config.project.site
+        }
+
+        licenses {
+          license {
+            name config.license.name
+            url config.license.url
+            distribution 'repo'
           }
+        }
 
-          wrap.contain 'issueManagement', [ system: 'Issue Tracker', url: config.project.tracker ]
-
-          wrap.contain 'ciManagement', [ system: 'Travis CI', url: "https://travis-ci.org/${config.project.groupKey}" ]
-
-          wrap.contain(
-            'scm',
-            [
-              connection: "scm:git:${config.project.vcs}",
-              developerConnection: "scm:git:${config.project.vcs}",
-              tag: 'master',
-              url: config.project.site
-            ]
-          )
-
-          lics = wrap.nested('licenses')
-
-          config.licenses.forEach {
-            lic -> lics.contain 'license', [ name: lic.name, url: lic.url, distribution: 'repo' ]
+        developers {
+          developer {
+            id config.developer.user
+            name config.developer.name
+            email config.developer.email
           }
-
-          return project;
-
-        }.call((Node) asNode())
+        }
       }
     }
   }
