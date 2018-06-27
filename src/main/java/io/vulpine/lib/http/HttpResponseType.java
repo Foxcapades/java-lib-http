@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vulpine.http;
+package io.vulpine.lib.http;
 
 public enum HttpResponseType
 {
@@ -92,29 +92,25 @@ public enum HttpResponseType
   NETWORK_READ_TIMEOUT_ERROR(598, "Network Read Timeout Error"),
   NETWORK_CONNECTION_TIMEOUT_ERROR(599, "Network Connection Timeout Error");
 
-  private final int    code;
+  private final int code;
 
   private final String name;
 
-  HttpResponseType( int code, String name )
-  {
+  HttpResponseType(int code, String name) {
     this.code = code;
     this.name = name;
   }
 
-  public int getCode()
-  {
+  public int getCode() {
     return code;
   }
 
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
-  public static HttpResponseType byCode( int code )
-  {
-    for ( HttpResponseType c : HttpResponseType.values() )
+  public static HttpResponseType byCode(int code) {
+    for (var c : HttpResponseType.values())
       if (c.code == code) {
         return c;
       }

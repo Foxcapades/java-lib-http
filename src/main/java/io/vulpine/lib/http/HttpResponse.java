@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vulpine.http;
+package io.vulpine.lib.http;
 
 public class HttpResponse
 {
@@ -23,25 +23,21 @@ public class HttpResponse
 
   private final String body;
 
-  public HttpResponse( final HttpResponseType type, final HttpRequest request, final String body )
-  {
+  public HttpResponse(HttpResponseType type, HttpRequest request, String body) {
     this.type = type;
     this.request = request;
     this.body = body;
   }
 
-  public HttpResponseType getType()
-  {
+  public HttpResponseType getType() {
     return type;
   }
 
-  public HttpRequest getRequest()
-  {
+  public HttpRequest getRequest() {
     return request;
   }
 
-  public String getBody()
-  {
+  public String getBody() {
     return body;
   }
 }

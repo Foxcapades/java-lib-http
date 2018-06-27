@@ -1,17 +1,17 @@
-def config = new HashMap < String, HashMap < String, String > >();
+def config = new HashMap < String, HashMap < String, String > >()
 
 config.organization = new HashMap()
-config.organization.title = 'Vulpine IO'
+config.organization.title = 'Foxcapades'
 config.organization.slug  = 'io.vulpine'
-config.organization.key   = 'Vulpine-IO'
+config.organization.key   = 'Foxcapades'
 config.organization.site  = "https://github.com/${config.organization.key}"
 
 config.project = new HashMap()
 config.project.group       = 'lib'
 config.project.name        = 'http'
-config.project.version     = '0.2.2'
+config.project.version     = '0.3.0'
 config.project.slug        = 'lib-http'
-config.project.jvm         = '1.6'
+config.project.jvm         = '1.10'
 config.project.description = 'Wrapper for Java\'s HttpUrlConnection for making easy web requests.'
 config.project.site        = "${config.organization.site}/${config.project.slug}"
 config.project.vcs         = "${config.organization.site}/${config.project.slug}.git"
@@ -21,7 +21,7 @@ config.developer = new HashMap()
 config.developer.name  = 'Elizabeth Harper'
 config.developer.email = 'elliefops@gmail.com'
 config.developer.user  = 'elliefops'
-config.developer.site  = 'https://github.com/EllieFops'
+config.developer.site  = 'https://github.com/Foxcapades'
 
 config.license = new HashMap()
 config.license.name = 'Apache License, Version 2.0'

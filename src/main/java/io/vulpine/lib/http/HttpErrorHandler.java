@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vulpine.http;
+package io.vulpine.lib.http;
 
 import java.io.IOException;
 
 public interface HttpErrorHandler
 {
-  void handle( final HttpRequest request, final IOException exception );
+  void handle(HttpRequest request, IOException exception);
 }
